@@ -1,0 +1,120 @@
+function [HT_0, HT_W] = getAbsoluteHT_kukaIIWA7(q,L, T0_W)
+%GETABSOLUTEHT_KUKAIIWA7 calculates the absolute Homogeneous transformations wrt the
+%robot base link0 and the wcf
+% input:
+%   q: is the joint position vector 1X7
+%   L: is the kinematic parameter array (see abbIRB4_params.m)
+%   T0_W: transformation (4x4) of the robot base wrt to wcf
+% return:
+%   HT_0: Cell array with all the absolute HT (4x4) wrt robot base
+%   HT_W: Cell array with all the absolute HT (4x4) wrt wcf
+
+% Joint positions
+
+q1=q(1);
+q2=q(2);
+q3=q(3);
+q4=q(4);
+q5=q(5);
+q6=q(6);
+q7=q(7);
+
+% Kinematic parameters
+L1=L(1);
+L2=L(2);
+L3=L(3);
+L4=L(4);
+
+% Common Substitutions
+s1=sin(q1);
+s2=sin(q2);
+s3=sin(q3);
+s4=sin(q4);
+s5=sin(q5);
+s6=sin(q6);
+s7=sin(q7);
+
+c1=cos(q1);
+c2=cos(q2);
+c3=cos(q3);
+c4=cos(q4);
+c5=cos(q5);
+c6=cos(q6);
+c7=cos(q7);
+
+s12=s1*s2;
+s13=s1*s3;
+
+s23=s2*s3;
+s24=s2*s4;
+
+c12=c1*c2;
+c13=c1*c3;
+c14=c1*c4;
+
+c23=c2*c3;
+c24=c2*c4;
+
+c34=c3*c4;
+
+
+c123=c12*c3;
+c12s3=c12*s3;
+c1s23=c1*s24;
+c14s2=c14*s2;
+c23s1=c23*s1;
+c34s2=c34*s2;
+c4s12=c4*s12;
+c2s13=c2*s13;
+s124=s12*s4;
+c3s24=c3*s24;
+c5s23=c5*s23;
+s135=s23*s5;
+
+% Absolute Homogeneous Transformations
+theta = [q1; q2 ; q3; q4; q5 ; q6 ; q7 ];
+d = [L1; 0; L2; 0; L3; 0; L4];
+alpha = [-pi/2; pi/2; pi/2; pi/2; pi/2; ];
+a = [0; 0; 0; 0; 0; 0; 0];
+
+T = cell(7,1);
+
+length = size(theta,1);
+for i = 1:length
+    T{i} = [cos(theta(i)), -sin(theta(i)) * cos(alpha(i)),  sin(theta(i)) * sin(alpha(i)), a(i) * cos(theta(i));
+            sin(theta(i)),  cos(theta(i)) * cos(alpha(i)), -cos(theta(i)) * sin(alpha(i)), a(i) * sin(theta(i));
+            0, sin(alpha(i)), cos(alpha(i)), d(i);
+            0, 0, 0, 1];
+end
+% TODO: Define the absolute HT wrt robot base (link 0)
+T1_0=T{1};
+
+T2_0=T1_0 * T{2};
+
+T3_0=T2_0 * T{3};
+
+T4_0=T3_0 * T{4};
+
+T5_0=T4_0 * T{5};
+
+T6_0=T5_0 * T{6};
+
+T7_0=T6_0 * T{7};
+
+
+% List with all the HT wrt to link 0, starting with H0_0
+HT_0={eye(4),T1_0, T2_0, T3_0, T4_0,T5_0, T6_0, T7_0};
+
+%TODO: Create a list with all the HT wrt to the wcf (w), starting with
+%Hw_w. In total, HT_W should have 9 elements Hw_w, H0_w, ..., Hef_w.
+T1_W = T0_W * T1_0;
+T2_W = T0_W * T2_0;
+T3_W = T0_W * T3_0;
+T4_W = T0_W * T4_0;
+T5_W = T0_W * T5_0;
+T6_W = T0_W * T6_0;
+T7_W = T0_W * T7_0;
+
+HT_W={eye(4), T0_W, T1_W, T2_W, T3_W, T4_W, T5_W, T6_W, T7_W};
+
+end
